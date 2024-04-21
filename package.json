@@ -30,7 +30,7 @@
 		"libp2p": "^0.42.2"
 	},
 	"devDependencies": {
-		"@vialabs-io/config": "file:../config",
+		"@vialabs-io/config": "git://github.com/VIALabs-io/config.git",
 		"@types/figlet": "^1.5.8",
 		"@types/node": "^20.6.2",
 		"figlet": "^1.5.2",
