@@ -27,9 +27,7 @@
 		"discord.js": "^14.14.1",
 		"dotenv": "^16.0.3",
 		"ethers": "5.7.2",
-		"libp2p": "^0.42.2"
-	},
-	"devDependencies": {
+		"libp2p": "^0.42.2",
 		"@vialabs-io/config": "git://github.com/VIALabs-io/config.git",
 		"@types/figlet": "^1.5.8",
 		"@types/node": "^20.6.2",
