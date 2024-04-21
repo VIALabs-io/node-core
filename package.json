@@ -1,0 +1,56 @@
+{
+	"name": "@vialabs-io/node-core",
+	"version": "0.5.0",
+	"description": "Core functionality for VIALabs node operations",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"type": "module",
+	"scripts": {
+	  "build": "tsc -p tsconfig.json",
+	  "clean": "rimraf dist",
+	  "prepare": "npm run build"
+	},
+	"repository": {
+	  "type": "git",
+	  "url": "git+https://github.com/VIALabs-io/node-core.git"
+	},
+	"author": "Atlas",
+	"license": "UNLICENSED",
+	"private": false,
+	"dependencies": {
+		"@chainsafe/libp2p-gossipsub": "^6.1.0",
+		"@chainsafe/libp2p-noise": "^11.0.0",
+		"@libp2p/bootstrap": "^6.0.0",
+		"@libp2p/mplex": "^7.1.1",
+		"@libp2p/tcp": "^6.1.2",
+		"chalk": "^5.2.0",
+		"discord.js": "^14.14.1",
+		"dotenv": "^16.0.3",
+		"ethers": "5.7.2",
+		"libp2p": "^0.42.2"
+	},
+	"devDependencies": {
+		"@vialabs-io/config": "file:../config",
+		"@types/figlet": "^1.5.8",
+		"@types/node": "^20.6.2",
+		"figlet": "^1.5.2",
+		"fixed-width-string": "^2.0.0",
+		"globals": "^15.0.0",
+		"rimraf": "^3.0.2",
+		"sha1": "^1.1.1",
+		"snappyjs": "^0.7.0",
+		"ts-node": "^10.9.1",
+		"tsx": "^4.7.0",
+		"typescript": "^5.4.5"
+	},
+	"files": [
+	  "dist/**/*"
+	],
+	"exports": {
+	  "./Vladiator": "./dist/Vladiator.js",
+	  "./drivers/*": "./dist/drivers/*.js",
+	  "./types/*": "./dist/types/*.js",
+	  "./utils/*": "./dist/utils/*.js"
+	}
+  }
+  
