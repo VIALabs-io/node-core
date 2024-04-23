@@ -6,13 +6,13 @@
 	"types": "dist/index.d.ts",
 	"type": "module",
 	"scripts": {
-	  "build": "tsc -p tsconfig.json",
-	  "clean": "rimraf dist",
-	  "prepare": "npm run build"
+		"build": "tsc -p tsconfig.json",
+		"clean": "rimraf dist",
+		"prepare": "npm run build"
 	},
 	"repository": {
-	  "type": "git",
-	  "url": "git+https://github.com/VIALabs-io/node-core.git"
+		"type": "git",
+		"url": "git+https://github.com/VIALabs-io/node-core.git"
 	},
 	"author": "Atlas",
 	"license": "UNLICENSED",
@@ -23,32 +23,39 @@
 		"@libp2p/bootstrap": "^6.0.0",
 		"@libp2p/mplex": "^7.1.1",
 		"@libp2p/tcp": "^6.1.2",
+		"@types/figlet": "^1.5.8",
+		"@vialabs-io/config": "git://github.com/VIALabs-io/config.git",
 		"chalk": "^5.2.0",
 		"discord.js": "^14.14.1",
 		"dotenv": "^16.0.3",
 		"ethers": "5.7.2",
-		"libp2p": "^0.42.2",
-		"@vialabs-io/config": "git://github.com/VIALabs-io/config.git",
-		"@types/figlet": "^1.5.8",
-		"@types/node": "^20.6.2",
+		"express": "^4.19.2",
 		"figlet": "^1.5.2",
 		"fixed-width-string": "^2.0.0",
 		"globals": "^15.0.0",
+		"libp2p": "^0.42.2",
 		"rimraf": "^3.0.2",
 		"sha1": "^1.1.1",
 		"snappyjs": "^0.7.0",
+		"socket.io": "^4.7.5",
+		"socket.io-client": "^4.7.5",
 		"ts-node": "^10.9.1",
-		"tsx": "^4.7.0",
-		"typescript": "^5.4.5"
+		"tsx": "^4.7.0"
 	},
 	"files": [
-	  "dist/**/*"
+		"dist/**/*"
 	],
 	"exports": {
-	  "./Vladiator": "./dist/Vladiator.js",
-	  "./drivers/*": "./dist/drivers/*.js",
-	  "./types/*": "./dist/types/*.js",
-	  "./utils/*": "./dist/utils/*.js"
+		"./Vladiator": "./dist/Vladiator.js",
+		"./DataStreamClient": "./dist/DataStreamClient.js",
+		"./drivers/*": "./dist/drivers/*.js",
+		"./types/*": "./dist/types/*.js",
+		"./utils/*": "./dist/utils/*.js"
+	},
+	"devDependencies": {
+		"@types/express": "^4.17.21",
+		"@types/node": "^20.12.7",
+		"@types/socket.io": "^3.0.2",
+		"typescript": "^5.4.5"
 	}
-  }
-  
+}
