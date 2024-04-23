@@ -14,6 +14,7 @@ import { IMessage } from "./types/IMessage.js";
 import Discord from "./DiscordHandler.js";
 import DriverBase from "./drivers/DriverBase.js";
 import DriverEVM from "./drivers/DriverEVM.js";
+import DataStreamServer from "./DataStreamServer.js";
 
 /**
  * Core class for the Vladiator system, handling P2P network operations, message processing, and driver management.
@@ -23,6 +24,7 @@ export class Vladiator implements IVladiator {
     public nodePublicKey: string;
     public drivers: { [chainId: number]: DriverBase } = {};
     public discord!: Discord;
+    public dataStreamServer!: DataStreamServer;
     public features: { [featureId: string]: any } = {};
     private network!: Libp2p;
     private config: IChainConfig;
@@ -47,6 +49,7 @@ export class Vladiator implements IVladiator {
      */
     private async initialize(): Promise<void> {
         await this.connectDiscord();
+        await this.connectDataStreamServer();
         await this.connectP2P();
         await this.loadChainDrivers();
 
@@ -142,6 +145,18 @@ export class Vladiator implements IVladiator {
     }
 
     /**
+     * Connects to the data stream server.
+     */
+    private async connectDataStreamServer(): Promise<void> {
+        if(!process.env.DATA_STREAM_PORT) {
+            console.log("Missing data stream port environment variable");
+        } else {
+            this.dataStreamServer = new DataStreamServer(parseInt(process.env.DATA_STREAM_PORT));
+            this.dataStreamServer.start();
+        }
+    }
+
+    /**
      * Subscribes to various topics on the P2P network.
      */
     private async subscribeToTopics(): Promise<void> {
@@ -186,6 +201,7 @@ export class Vladiator implements IVladiator {
 
         logTraffic(message);
         this.sendDiscord(message);
+        this.sendDataStream(message);
 
         if(this.drivers[message.source!] === undefined) return;
         const driver = this.drivers[message.source!];
@@ -231,6 +247,15 @@ export class Vladiator implements IVladiator {
     async sendDiscord(message: IMessage | string): Promise<void> {
         if (!this.discord) return;
         this.discord.send(message);
+    }
+
+    /**
+     * Sends a message to the data stream server.
+     * @param message The message to send.
+     */
+    async sendDataStream(message: IMessage): Promise<void> {
+        if (!this.dataStreamServer) return;
+        this.dataStreamServer.sendData(message);
     }
 
     /**
