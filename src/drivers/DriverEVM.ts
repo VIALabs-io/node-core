@@ -127,7 +127,6 @@ export default class DriverEVM extends DriverBase {
         const messageLog = txnReceipt.logs.find((l: any) => l.topics[0] === messageTopic);
 
         if(featureLog) {
-            console.log('feature log found', featureLog);
             const featureRequest = this.featureInterface.decodeEventLog(featureTopic, featureLog.data);
 
             message.featureId = Number(featureRequest[2]);
