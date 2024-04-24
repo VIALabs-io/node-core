@@ -169,7 +169,7 @@ export class Vladiator implements IVladiator {
             'MESSAGE:INVALID',
             'FEATURE:START',
             'FEATURE:FAILED',
-            'FEATURE:COMPLETE',
+            'FEATURE:COMPLETED',
         ];
 
         topics.forEach(topic => {
