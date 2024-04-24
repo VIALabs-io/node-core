@@ -127,7 +127,7 @@ export default class DriverEVM extends DriverBase {
         const messageLog = txnReceipt.logs.find((l: any) => l.topics[0] === messageTopic);
 
         if(featureLog) {
-            console.log('feature log found');
+            logDebug(this.chainId, 'feature log found');
             const featureRequest = this.featureInterface.decodeEventLog(featureTopic, featureLog.data);
 
             message.featureId = Number(featureRequest[2]);
@@ -137,7 +137,7 @@ export default class DriverEVM extends DriverBase {
         }
 
         if(messageLog) {
-            console.log('message log found');
+            logDebug(this.chainId, 'message log found');
             const messageRequest = this.chainInterface.decodeEventLog(messageTopic, messageLog.data);
 
             message.values = {
