@@ -14,6 +14,7 @@ abstract class DriverBase implements IDriverBase {
     protected nodePrivateKey!: string;  // Private key of the node for signing transactions.
     protected nodePublicKey!: string;   // Public key of the node corresponding to the private key.
     protected signatures: Record<string, string> = {};  // Cache for signatures to prevent reprocessing.
+    protected featureReplies: Record<string, string> = {};  // Cache for feature replies from project nodes
     public nodeSigner!: ethers.Wallet;  // Ethers.js wallet instance for the node.
     public chainId: number;             // Chain ID associated with the driver instance.
     public provider!: ethers.providers.JsonRpcProvider; // Ethers provider for interacting with the blockchain.
@@ -84,6 +85,9 @@ abstract class DriverBase implements IDriverBase {
                 message.type   = 'MESSAGE:SIGNED';
                 message.author = this.nodePublicKey;
                 message.signature = this.signatures[message.transactionHash];
+                if(this.featureReplies[message.transactionHash] !== undefined) {
+                    message.featureReply = this.featureReplies[message.transactionHash];
+                }
                 this.vladiator.sendMessage(message);
             }
             return;
@@ -128,6 +132,10 @@ abstract class DriverBase implements IDriverBase {
                     message = await this.processFeatures(message);
                     if(message.transactionHash === undefined || message.values === undefined || message.featureFailed === true) {
                         throw new Error('feature failed');
+                    } else {
+                        if(message.featureReply !== undefined) {
+                            this.featureReplies[message.transactionHash] = message.featureReply;
+                        }
                     }
                 } catch(err) {
                     logDebug(this.chainId, 'error processing feature ' + message.transactionHash);
