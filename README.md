@@ -87,6 +87,34 @@ if (features) {
 }
 ```
 
+
+## DataStreamClient
+
+The `DataStreamClient` package allows you to connect to a real-time data stream from the P2P validation network. Here's how you can use it:
+
+```javascript
+import { DataStreamClient } from '@vialabs-io/node-core/DataStreamClient';
+
+// Create a new instance of DataStreamClient (run local node or point to external node)
+const client = new DataStreamClient('https://localhost:3000');
+
+// Connect to the server
+client.connect(
+    (message) => {
+        // Handle incoming message
+        console.log('Received message:', message);
+    },
+    () => {
+        // On connect callback
+        console.log('Connected to server');
+    },
+    () => {
+        // On disconnect callback
+        console.log('Disconnected from server');
+    }
+);
+```
+
 ## Contributing
 
 Contributions to the `node-core` package are welcome. Please ensure to pass all tests and follow the coding conventions and commit guidelines described in the contributing guide.
