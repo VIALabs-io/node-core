@@ -204,13 +204,13 @@ export class Vladiator extends EventEmitter implements IVladiator {
         }
 
         logTraffic(message);
+        this.emit('message', message);
+        if(message.values) this.emit(message.values?.txId, message);
         this.sendDiscord(message);
         this.sendDataStream(message);
 
         if(this.drivers[message.source!] === undefined) return;
         const driver = this.drivers[message.source!];
-
-        this.emit('message', message); // Emit message when received
     
         if(topic === 'MESSAGE:REQUEST') driver.processMessageRequest(message);
     }
