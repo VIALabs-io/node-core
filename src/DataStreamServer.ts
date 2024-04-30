@@ -15,8 +15,16 @@ class DataStreamServer {
     constructor(port: number = 3000) {
         this.app = express();
         this.server = http.createServer(this.app);
-        this.io = new SocketIOServer(this.server);
         this.port = port;
+
+        this.io = new SocketIOServer(this.server, {
+            cors: {
+                origin: "*",
+                methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                allowedHeaders: ["*"],
+                credentials: true
+            }
+        });
         
         this.app.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', '*');
@@ -24,6 +32,8 @@ class DataStreamServer {
             res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
             next();
         });
+
+
 
         this.configureRoutes();
         this.handleSocketConnections();
