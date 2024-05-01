@@ -38,6 +38,8 @@ interface IVladiator {
     sendDiscord(message: IMessage | string): Promise<void>;
 
     sendDataStream(message: IMessage): Promise<void>;
+
+    sendDataStreamRaw(message: any): Promise<void>;
 }
 
 export { IVladiator };
