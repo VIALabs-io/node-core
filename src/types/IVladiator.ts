@@ -36,6 +36,8 @@ interface IVladiator {
      * @returns A promise that resolves when the message is sent.
      */
     sendDiscord(message: IMessage | string): Promise<void>;
+
+    sendDataStream(message: IMessage): Promise<void>;
 }
 
 export { IVladiator };
