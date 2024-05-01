@@ -264,6 +264,11 @@ export class Vladiator extends EventEmitter implements IVladiator {
         this.dataStreamServer.sendData(message);
     }
 
+    async sendDataStreamRaw(message: any): Promise<void> {
+        if (!this.dataStreamServer) return;
+        this.dataStreamServer.sendDataRaw(message);
+    }   
+
     /**
      * Periodically sends a heartbeat message across the network.
      */    
