@@ -60,6 +60,10 @@ class DataStreamServer {
         this.io.emit('message', JSON.stringify({ message }));
     }
 
+    public sendDataRaw(data: any): void {
+        this.io.emit('message', data);
+    }
+
     public start(): void {
         this.server.listen(this.port, () => {
             console.log(`DataStreamServer is running on port ${this.port}`);
