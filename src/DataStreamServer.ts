@@ -61,7 +61,7 @@ class DataStreamServer {
     }
 
     public sendDataRaw(data: any): void {
-        this.io.emit('message', data);
+        this.io.emit('message', JSON.stringify({data}));
     }
 
     public start(): void {
