@@ -143,11 +143,11 @@ export class DiscordHandler {
             const log = message;
             switch(log.type) {
                 case 'MESSAGE:REQUEST':
-                    if(destDriver) return;
+                    //if(destDriver && destDriver.inQueue[message.transactionHash!]) return;
                     message = fws('MESSAGE:REQUEST', 20);
                     break;
                 case 'MESSAGE:SIGNED':
-                    if(destDriver) return;
+                    //if(destDriver && destDriver.inQueue[message.transactionHash!]) return;
                     message = fws('MESSAGE:SIGNED', 20);
                     break;
                 case 'MESSAGE:EXECUTION':
@@ -158,12 +158,20 @@ export class DiscordHandler {
                     break;
                 case 'MESSAGE:INVALID':
                     message = fws('MESSAGE:INVALID', 20);
+                    break;                
+                case 'MESSAGE:EXISTS':
+                    return;
+                    message = fws('MESSAGE:EXISTS', 20);
                     break;
                 case 'FEATURE:START':
                     message = fws('FEATURE:START', 20);
                     break;
                 case 'FEATURE:FAILED':
                     message = fws('FEATURE:FAILED', 20);
+                    break;
+                case 'HEARTBEAT':
+                    return;
+                    message = fws('HEARTBEAT:KEEPALIVE', 20);
                     break;
                 default:
                     message = fws('UNKNOWN', 20);
