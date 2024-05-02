@@ -169,6 +169,9 @@ export class DiscordHandler {
                 case 'FEATURE:FAILED':
                     message = fws('FEATURE:FAILED', 20);
                     break;
+                case 'FEATURE:COMPLETED':
+                    message = fws('FEATURE:COMPLETED', 20);
+                    break;
                 case 'HEARTBEAT':
                     return;
                     message = fws('HEARTBEAT:KEEPALIVE', 20);
