@@ -24,7 +24,7 @@
 		"@libp2p/mplex": "^7.1.1",
 		"@libp2p/tcp": "^6.1.2",
 		"@types/figlet": "^1.5.8",
-		"@vialabs-io/config": "git://github.com/VIALabs-io/config.git",
+		"@vialabs-io/config": "https://github.com/VIALabs-io/config.git",
 		"chalk": "^5.2.0",
 		"discord.js": "^14.14.1",
 		"dotenv": "^16.0.3",
