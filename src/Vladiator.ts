@@ -16,6 +16,8 @@ import Discord from "./DiscordHandler.js";
 import DriverBase from "./drivers/DriverBase.js";
 import DriverEVM from "./drivers/DriverEVM.js";
 import DataStreamServer from "./DataStreamServer.js";
+import { join } from "path";
+import { cwd } from "process";
 
 /**
  * Core class for the Vladiator system, handling P2P network operations, message processing, and driver management.
@@ -54,12 +56,31 @@ export class Vladiator extends EventEmitter implements IVladiator {
         await this.connectDataStreamServer();
         await this.connectP2P();
         await this.loadChainDrivers();
+        await this.loadFeatureDirectory();
 
         this.emit('ready');
 
         setInterval(() => {
             this.sendHeartbeat();
         }, 2 * 60 * 1000);
+    }
+
+    public async loadFeatureDirectory(): Promise<void> {
+        const fs = require('fs');
+        const path = require('path');
+        const featureDirectory = join(cwd(), '/src/features');
+
+        fs.readdir(featureDirectory, (err: any, files: any) => {
+            if(err) {
+                console.error('Error reading feature directory:', err);
+                return;
+            }
+
+            files.forEach((file: any) => {
+                const feature = require(path.join(featureDirectory, file));
+                this.loadFeature(feature);
+            });
+        });
     }
 
     /**

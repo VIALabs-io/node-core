@@ -3,7 +3,7 @@
 
 import { ethers } from "ethers";
 import { IMessage } from "../types/IMessage.js";
-import { chainsConfig } from "@vialabs-io/config";
+import chainsConfig from "@vialabs-io/contracts/config/chains.js";
 import DriverBase from "./DriverBase.js";
 import { logDebug } from "../utils/logDebug.js";
 

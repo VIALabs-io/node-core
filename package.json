@@ -5,57 +5,59 @@
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"type": "module",
+	"files": [
+	  "dist/**/*"
+	],
 	"scripts": {
-		"build": "tsc -p tsconfig.json",
-		"clean": "rimraf dist",
-		"prepare": "npm run build"
+	  "build": "tsc -p tsconfig.json",
+	  "clean": "rimraf dist",
+	  "prepare": "npm run build"
 	},
 	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/VIALabs-io/node-core.git"
+	  "type": "git",
+	  "url": "https://github.com/VIALabs-io/node-core.git"
 	},
 	"author": "Atlas",
 	"license": "UNLICENSED",
 	"private": false,
 	"dependencies": {
-		"@chainsafe/libp2p-gossipsub": "^6.1.0",
-		"@chainsafe/libp2p-noise": "^11.0.0",
-		"@libp2p/bootstrap": "^6.0.0",
-		"@libp2p/mplex": "^7.1.1",
-		"@libp2p/tcp": "^6.1.2",
-		"@types/figlet": "^1.5.8",
-		"@vialabs-io/config": "https://github.com/VIALabs-io/config.git",
-		"chalk": "^5.2.0",
-		"discord.js": "^14.14.1",
-		"dotenv": "^16.0.3",
-		"ethers": "5.7.2",
-		"express": "^4.19.2",
-		"figlet": "^1.5.2",
-		"fixed-width-string": "^2.0.0",
-		"globals": "^15.0.0",
-		"libp2p": "^0.42.2",
-		"rimraf": "^3.0.2",
-		"sha1": "^1.1.1",
-		"snappyjs": "^0.7.0",
-		"socket.io": "^4.7.5",
-		"socket.io-client": "^4.7.5",
-		"ts-node": "^10.9.1",
-		"tsx": "^4.7.0"
-	},
-	"files": [
-		"dist/**/*"
-	],
-	"exports": {
-		"./Vladiator": "./dist/Vladiator.js",
-		"./DataStreamClient": "./dist/DataStreamClient.js",
-		"./drivers/*": "./dist/drivers/*.js",
-		"./types/*": "./dist/types/*.js",
-		"./utils/*": "./dist/utils/*.js"
+	  "@vialabs-io/contracts": "https://github.com/VIALabs-io/contracts.git",
+	  "@chainsafe/libp2p-gossipsub": "^6.1.0",
+	  "@chainsafe/libp2p-noise": "^11.0.0",
+	  "@libp2p/bootstrap": "^6.0.0",
+	  "@libp2p/mplex": "^7.1.1",
+	  "@libp2p/tcp": "^6.1.2",
+	  "@types/figlet": "^1.5.8",
+	  "chalk": "^5.2.0",
+	  "discord.js": "^14.14.1",
+	  "dotenv": "^16.0.3",
+	  "ethers": "5.7.2",
+	  "express": "^4.19.2",
+	  "figlet": "^1.5.2",
+	  "fixed-width-string": "^2.0.0",
+	  "globals": "^15.0.0",
+	  "libp2p": "^0.42.2",
+	  "rimraf": "^3.0.2",
+	  "sha1": "^1.1.1",
+	  "snappyjs": "^0.7.0",
+	  "socket.io": "^4.7.5",
+	  "socket.io-client": "^4.7.5",
+	  "ts-node": "^10.9.1",
+	  "tsx": "^4.7.0"
 	},
 	"devDependencies": {
-		"@types/express": "^4.17.21",
-		"@types/node": "^20.12.7",
-		"@types/socket.io": "^3.0.2",
-		"typescript": "^5.4.5"
+	  "@types/express": "^4.17.21",
+	  "@types/node": "^20.12.7",
+	  "@types/socket.io": "^3.0.2",
+	  "typescript": "^5.4.5"
+	},
+	"exports": {
+	  "./Vladiator": "./dist/Vladiator.js",
+	  "./DataStreamClient": "./dist/DataStreamClient.js",
+	  "./drivers/*": "./dist/drivers/*.js",
+	  "./types/*": "./dist/types/*.js",
+	  "./utils/*": "./dist/utils/*.js",
+	  ".": "./dist/index.js"
 	}
-}
+  }
+  

@@ -1,7 +1,7 @@
 // Copyright 2021-2024 Atlas
 // Author: Atlas (atlas@vialabs.io)
 
-import { readdirSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { cwd } from 'process';
 import { Client, Collection, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
@@ -54,23 +54,42 @@ export class DiscordHandler {
      * Loads commands from the 'commands' directory within the source directory.
      */
     private loadCommands(): void {
-        const foldersPath = join(cwd(), '/src/commands');
+        const foldersPath = join(cwd(), '/src/discord-commands');
+    
+        // Check if the directory exists
+        if (!existsSync(foldersPath)) {
+            console.log(`[INFO] The directory at ${foldersPath} does not exist.`);
+            return;
+        }
+    
         const commandFolders = readdirSync(foldersPath);
-
+    
         commandFolders.forEach(folder => {
             const commandsPath = join(foldersPath, folder);
+    
+            // Check if the folder exists and is a directory
+            if (!existsSync(commandsPath)) {
+                console.log(`[INFO] The folder at ${commandsPath} does not exist.`);
+                return;
+            }
+    
             const commandFiles = readdirSync(commandsPath).filter(file => file.endsWith('.ts'));
-
-            /*commandFiles.forEach(async file => {
+    
+            commandFiles.forEach(file => {
                 const filePath = join(commandsPath, file);
-                const command: IDiscordCommand = await import(filePath);
-                if (command.data && command.execute!) {
-                    this.commands.set(command.data.name, command);
-                    console.log('loaded command', command.data.name);
-                } else {
-                    console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+                try {
+                    const commandModule = require(filePath);
+                    const command: IDiscordCommand = commandModule.default || commandModule;
+                    if (command.data) {
+                        this.commands.set(command.data.name, command);
+                        console.log('loaded command', command.data.name);
+                    } else {
+                        console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+                    }
+                } catch (err) {
+                    console.error(`[ERROR] Failed to load command at ${filePath}:`, err);
                 }
-            });*/
+            });
         });
     }
 

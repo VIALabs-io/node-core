@@ -1,2 +1,2 @@
-export { Vladiator } from './Vladiator';
-export { DiscordHandler } from './DiscordHandler';
+export { Vladiator } from './Vladiator.js';
+export { DiscordHandler } from './DiscordHandler.js';
