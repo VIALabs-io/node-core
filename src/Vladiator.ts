@@ -18,6 +18,13 @@ import DriverEVM from "./drivers/DriverEVM.js";
 import DataStreamServer from "./DataStreamServer.js";
 import { join } from "path";
 import { cwd } from "process";
+import path from "path";
+import fs from "fs";
+
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
+global.require = require;
 
 /**
  * Core class for the Vladiator system, handling P2P network operations, message processing, and driver management.
@@ -66,8 +73,6 @@ export class Vladiator extends EventEmitter implements IVladiator {
     }
 
     public async loadFeatureDirectory(): Promise<void> {
-        const fs = require('fs');
-        const path = require('path');
         const featureDirectory = join(cwd(), '/src/features');
 
         fs.readdir(featureDirectory, (err: any, files: any) => {
