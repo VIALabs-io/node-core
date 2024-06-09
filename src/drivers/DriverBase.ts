@@ -122,7 +122,7 @@ abstract class DriverBase implements IDriverBase {
             // process any features
 
             if(message.featureId !== undefined) {
-                logDebug(this.chainId, 'feature start ' + message.transactionHash);
+                logDebug(this.chainId, 'feature start ('+message.featureId+') ' + message.transactionHash);
 
                 message.type   = 'FEATURE:START';
                 message.author = this.nodePublicKey;
@@ -208,6 +208,7 @@ abstract class DriverBase implements IDriverBase {
     private async processFeatures(message: IMessage): Promise<IMessage> {
         try {
             if(this.vladiator.features[message.featureId!] === undefined) {
+                console.log(this.vladiator.features);
                 logDebug(this.chainId, 'feature not found ' + message.featureId);
                 return message;
             }

@@ -20,10 +20,10 @@ import { join } from "path";
 import { cwd } from "process";
 import path from "path";
 import fs from "fs";
-
+import { pathToFileURL } from "url";
 import { createRequire } from "module";
-const require = createRequire(import.meta.url);
 
+const require = createRequire(import.meta.url);
 global.require = require;
 
 /**
@@ -73,27 +73,44 @@ export class Vladiator extends EventEmitter implements IVladiator {
     }
 
     public async loadFeatureDirectory(): Promise<void> {
-        const featureDirectory = join(cwd(), '/src/features');
-
-        fs.readdir(featureDirectory, (err: any, files: any) => {
-            if(err) {
-                console.error('Error reading feature directory:', err);
-                return;
+        // Load features from the features/index.ts file
+        const featurePath = path.join(cwd(), 'src/features');
+        if (!fs.existsSync(featurePath)) {
+            console.log("No features directory found");
+            return;
+        }
+    
+        try {
+            // Dynamically import the features/index.ts file
+            const featuresModule = await import(pathToFileURL(path.join(featurePath, 'index.ts')).href);
+    
+            if (featuresModule.default && Array.isArray(featuresModule.default)) {
+                for (const feature of featuresModule.default) {
+                    await this.loadFeature(feature);
+                }
+            } else {
+                console.log("No valid features found in index.ts");
             }
-
-            files.forEach((file: any) => {
-                const feature = require(path.join(featureDirectory, file));
-                this.loadFeature(feature);
-            });
-        });
+        } catch (error) {
+            console.error("Error loading features:", error);
+        }
     }
-
-    /**
-     * Loads a single feature into the Vladiator system.
-     * @param feature The feature object to load.
-     */
+    
     public async loadFeature(feature: any): Promise<void> {
-        this.features[parseInt(feature.featureId)] = feature;
+        if (typeof feature !== 'object' || feature === null) {
+            console.error(`Feature is not a valid object:`, feature);
+            return;
+        }
+    
+        console.log('Loading feature:', feature.featureId);
+    
+        if (typeof feature.featureId !== 'number' || isNaN(feature.featureId)) {
+            console.error(`Invalid featureId for feature:`, feature);
+            return;
+        }
+    
+        const featureId = feature.featureId;
+        this.features[featureId] = feature;
     }
 
     /**
