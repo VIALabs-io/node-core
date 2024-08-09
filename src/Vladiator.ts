@@ -118,11 +118,18 @@ export class Vladiator extends EventEmitter implements IVladiator {
      */
     private async connectP2P(): Promise<void> {
         let bootstrapers:any = [];
+        let peerDiscovery:any = [];
 
         if(process.env.BOOTSTRAP_PEERS) {
             bootstrapers = process.env.BOOTSTRAP_PEERS.split(',');
-        } else if (process.env.ENV === 'development') {
+        } else if (process.env.NODE_ENV === 'development') {
             bootstrapers = ['/ip4/162.19.205.208/tcp/50111/p2p/16Uiu2HAm8mUGETqTjHMTSc2WK3c8gBR8qqSXYMN61AWKKEsfVnu4'];
+        }
+
+        if(bootstrapers.length > 0) {
+            peerDiscovery = [
+                bootstrap({ list: bootstrapers })
+            ];
         }
 
         this.network = await createLibp2p({
@@ -132,9 +139,7 @@ export class Vladiator extends EventEmitter implements IVladiator {
             transports: [tcp()],
             connectionEncryption: [noise()],
             streamMuxers: [mplex()],
-            peerDiscovery: [
-                bootstrap({ list: bootstrapers })
-            ],
+            peerDiscovery: peerDiscovery,
             pubsub: gossipsub({ emitSelf: true, enabled: true }),
             connectionManager: {
                 autoDial: true,
