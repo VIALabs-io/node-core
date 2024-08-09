@@ -267,7 +267,14 @@ export class Vladiator extends EventEmitter implements IVladiator {
         this.sendDiscord(message);
         this.sendDataStream(message);
 
-        if(this.drivers[message.source!] === undefined) return;
+        if(message.type === 'PENALTY:CHAINMISS') return;
+        if(this.drivers[message.source!] === undefined) {
+            console.log('no driver for', message.source);
+            message.type = 'PENALTY:CHAINMISS';
+            message.author = this.nodePublicKey;
+            this.sendMessage(message);
+            return;
+        }
         const driver = this.drivers[message.source!];
     
         if(topic === 'MESSAGE:REQUEST') driver.processMessageRequest(message);
