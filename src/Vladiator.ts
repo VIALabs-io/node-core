@@ -269,7 +269,7 @@ export class Vladiator extends EventEmitter implements IVladiator {
 
         if(message.type === 'PENALTY:CHAINMISS') return;
         if(this.drivers[message.source!] === undefined) {
-            console.log('no driver for', message.source);
+            if(message.source == 1010101010) return;
             message.type = 'PENALTY:CHAINMISS';
             message.author = this.nodePublicKey;
             this.sendMessage(message);
