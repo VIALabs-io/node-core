@@ -117,9 +117,13 @@ export class Vladiator extends EventEmitter implements IVladiator {
      * Establishes the P2P connections and setups libp2p network.
      */
     private async connectP2P(): Promise<void> {
-        const bootstrapers = [
-            '/ip4/162.19.205.208/tcp/50111/p2p/16Uiu2HAm8mUGETqTjHMTSc2WK3c8gBR8qqSXYMN61AWKKEsfVnu4'
-        ];
+        let bootstrapers:any = [];
+
+        if(process.env.BOOTSTRAP_PEERS) {
+            bootstrapers = process.env.BOOTSTRAP_PEERS.split(',');
+        } else if (process.env.ENV === 'development') {
+            bootstrapers = ['/ip4/162.19.205.208/tcp/50111/p2p/16Uiu2HAm8mUGETqTjHMTSc2WK3c8gBR8qqSXYMN61AWKKEsfVnu4'];
+        }
 
         this.network = await createLibp2p({
             addresses: {
