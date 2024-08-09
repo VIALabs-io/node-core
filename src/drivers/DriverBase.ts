@@ -116,7 +116,9 @@ abstract class DriverBase implements IDriverBase {
         // check message and sign it if valid
         if(await this.isMessageValid(message)) {
             if (!destDriver) {
-                logDebug(this.chainId, 'no driver for ' + message.values!.chain);
+                message.type = 'PENALTY:CHAINMISS';
+                message.author = this.nodePublicKey;
+                this.vladiator.sendMessage(message);
                 return;
             }
 

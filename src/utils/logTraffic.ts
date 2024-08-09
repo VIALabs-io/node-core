@@ -32,6 +32,9 @@ export const logTraffic = (log: IMessage) => {
             case 'MESSAGE:EXISTS':
                 process.stdout.write(fws(c.gray('MESSAGE:EXISTS'), 20));
                 break;
+            case 'PENALTY:CHAINMISS':
+                process.stdout.write(fws(c.bgRed('PENALTY:CHAINMISS'), 20));
+                break;
             case 'HEARTBEAT':
                 process.stdout.write(fws(c.gray('HEARTBEAT:KEEPALIVE'), 20));
                 break;

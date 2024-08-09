@@ -222,10 +222,16 @@ export class Vladiator extends EventEmitter implements IVladiator {
             'MESSAGE:SIGNED',
             'MESSAGE:QUEUED',
             'MESSAGE:EXECUTION',
+            'MESSAGE:EXISTS',
             'MESSAGE:INVALID',
+            'MESSAGE:RESET',
             'FEATURE:START',
             'FEATURE:FAILED',
             'FEATURE:COMPLETED',
+            'PENALTY:CHAINMISS',
+            'PENALTY:TATTLE',
+            'PENALTY:SIGNED',
+            'PENALTY:EXECUTION',
         ];
 
         topics.forEach(topic => {
