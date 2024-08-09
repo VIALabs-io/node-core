@@ -85,6 +85,7 @@ abstract class DriverBase implements IDriverBase {
                 message.type   = 'MESSAGE:SIGNED';
                 message.author = this.nodePublicKey;
                 message.signature = this.signatures[message.transactionHash];
+                message.signer = this.nodeSigner.address;
                 if(this.featureReplies[message.transactionHash] !== undefined) {
                     message.featureReply = this.featureReplies[message.transactionHash];
                 }
