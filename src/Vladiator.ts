@@ -1,7 +1,6 @@
 // Copyright 2021-2024 Atlas
 // Author: Atlas (atlas@vialabs.io)
 
-import { EventEmitter } from "events";
 import { createLibp2p, Libp2p } from "libp2p";
 import { tcp } from "@libp2p/tcp";
 import { noise } from "@chainsafe/libp2p-noise";
@@ -29,7 +28,7 @@ global.require = require;
 /**
  * Core class for the Vladiator system, handling P2P network operations, message processing, and driver management.
  */
-export class Vladiator extends EventEmitter implements IVladiator {
+export class Vladiator implements IVladiator {
     public nodePrivateKey: string;
     public nodePublicKey: string;
     public drivers: { [chainId: number]: DriverBase } = {};
@@ -45,7 +44,6 @@ export class Vladiator extends EventEmitter implements IVladiator {
      * @param config Configuration object containing network settings.
      */
     constructor(nodePrivateKey: string, config: IChainConfig) {
-        super();
         this.nodePrivateKey = nodePrivateKey;
         this.nodePublicKey = process.env.NODE_PUBLIC_KEY || '';
         this.config = config;
@@ -64,8 +62,6 @@ export class Vladiator extends EventEmitter implements IVladiator {
         await this.connectP2P();
         await this.loadChainDrivers();
         await this.loadFeatureDirectory();
-
-        this.emit('ready');
 
         setInterval(() => {
             this.sendHeartbeat();
@@ -262,8 +258,6 @@ export class Vladiator extends EventEmitter implements IVladiator {
         }
 
         logTraffic(message);
-        this.emit('message', message);
-        if(message.values) this.emit(message.values?.txId, message);
         this.sendDiscord(message);
         this.sendDataStream(message);
 
