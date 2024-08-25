@@ -43,22 +43,25 @@ export class Vladiator implements IVladiator {
      * @param nodePrivateKey Private key for the node.
      * @param config Configuration object containing network settings.
      */
-    constructor(nodePrivateKey: string, config: IChainConfig) {
+    constructor(nodePrivateKey: string, config: IChainConfig, filters?: Partial<IMessage>) {
         this.nodePrivateKey = nodePrivateKey;
         this.nodePublicKey = process.env.NODE_PUBLIC_KEY || '';
         this.config = config;
-        this.initialize().catch(error => {
+    
+        // Initialize DataStreamServer with filters if provided
+        this.initialize(filters).catch(error => {
             console.error("Failed to initialize:", error);
             process.exit(1);
         });
     }
+    
 
     /**
      * Starts the initialization process for Discord, P2P, and chain drivers.
      */
-    private async initialize(): Promise<void> {
+    private async initialize(filters?: Partial<IMessage>): Promise<void> {
         await this.connectDiscord();
-        await this.connectDataStreamServer();
+        await this.connectDataStreamServer(filters);
         await this.connectP2P();
         await this.loadChainDrivers();
         await this.loadFeatureDirectory();
@@ -199,14 +202,14 @@ export class Vladiator implements IVladiator {
     /**
      * Connects to the data stream server.
      */
-    private async connectDataStreamServer(): Promise<void> {
-        if(!process.env.DATA_STREAM_PORT) {
+    private async connectDataStreamServer(filters: Partial<IMessage> = {}): Promise<void> {
+        if (!process.env.DATA_STREAM_PORT) {
             console.log("Missing data stream port environment variable");
         } else {
-            this.dataStreamServer = new DataStreamServer(parseInt(process.env.DATA_STREAM_PORT));
+            this.dataStreamServer = new DataStreamServer(parseInt(process.env.DATA_STREAM_PORT), filters);
             this.dataStreamServer.start();
         }
-    }
+    } 
 
     /**
      * Subscribes to various topics on the P2P network.

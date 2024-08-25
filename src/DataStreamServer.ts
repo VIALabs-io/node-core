@@ -1,6 +1,3 @@
-// Copyright 2021-2024 Atlas
-// Author: Atlas (atlas@vialabs.io)
-
 import http from 'http';
 import express, { Request, Response } from 'express';
 import { Server as SocketIOServer } from 'socket.io';
@@ -11,11 +8,13 @@ class DataStreamServer {
     private server: http.Server;
     private io: SocketIOServer;
     private port: number;
+    private filters: Partial<IMessage>;
 
-    constructor(port: number = 3000) {
+    constructor(port: number = 3000, filters: Partial<IMessage> = {}) {
         this.app = express();
         this.server = http.createServer(this.app);
         this.port = port;
+        this.filters = filters;
 
         this.io = new SocketIOServer(this.server, {
             cors: {
@@ -25,15 +24,13 @@ class DataStreamServer {
                 credentials: true
             }
         });
-        
+
         this.app.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', '*');
             res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
             res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
             next();
         });
-
-
 
         this.configureRoutes();
         this.handleSocketConnections();
@@ -56,12 +53,47 @@ class DataStreamServer {
         });
     }
 
+    public setFilters(filters: Partial<IMessage>): void {
+        this.filters = filters;
+    }
+
+    private applyFilters(message: IMessage): boolean {
+        if (Object.keys(this.filters).length === 0) {
+            return true;
+        }
+
+        for (const key in this.filters) {
+            if (this.filters.hasOwnProperty(key)) {
+                const filterValue = this.filters[key as keyof IMessage];
+                const messageValue = message[key as keyof IMessage];
+
+                // Handle nested values object filtering
+                if (key === "values" && typeof filterValue === "object" && filterValue !== null) {
+                    const valuesFilter = filterValue as Partial<IMessage["values"]>;
+                    for (const subKey in valuesFilter) {
+                        if (valuesFilter.hasOwnProperty(subKey)) {
+                            const subKeyTyped = subKey as keyof IMessage["values"];
+                            if (valuesFilter[subKeyTyped] !== message.values?.[subKeyTyped]) {
+                                return false;
+                            }
+                        }
+                    }
+                } else if (filterValue !== messageValue) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public sendData(message: IMessage): void {
-        this.io.emit('message', JSON.stringify({ message }));
+        if (this.applyFilters(message)) {
+            this.io.emit('message', JSON.stringify({ message }));
+        }
     }
 
     public sendDataRaw(data: any): void {
-        this.io.emit('message', JSON.stringify({data}));
+        this.io.emit('message', JSON.stringify({ data }));
     }
 
     public start(): void {
