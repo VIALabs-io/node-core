@@ -36,8 +36,8 @@ export default class DriverEVM extends DriverBase {
         try {
             this.provider = new ethers.providers.StaticJsonRpcProvider(rpcAddress);
             this.contract = new ethers.Contract(chainsConfig[this.chainId].message, this.chainInterface, this.provider);
-        } catch(err) {
-            console.log('error connecting to RPC for '+this.chainId+' ('+rpcAddress+')')
+        } catch (err) {
+            console.log('error connecting to RPC for ' + this.chainId + ' (' + rpcAddress + ')')
             console.log(err);
         }
     }
@@ -50,45 +50,46 @@ export default class DriverEVM extends DriverBase {
      */
     async isMessageValid(message: IMessage): Promise<boolean> {
         try {
-            if(message.transactionHash === undefined) return false;
-            if(message.values === undefined) return false;
+            if (message?.transactionHash === undefined) return false;
+            if (message?.values === undefined) return false;
 
-            let txnReceipt;
-            txnReceipt = await this.provider.waitForTransaction(message.transactionHash, message.values.confirmations);
+            let txnReceipt = await this.provider.waitForTransaction(message.transactionHash, message.values.confirmations);
 
-            if(txnReceipt.confirmations < message.values.confirmations) {
+            if (txnReceipt.confirmations < message.values.confirmations) {
                 // something went wrong if we get here, abort
                 console.log('abort wait for confirmations');
-                delete(this.signatures[message.transactionHash]);
+                delete (this.signatures[message.transactionHash]);
                 return false;
             }
 
-            for(let x=0; x < txnReceipt.logs.length; x++) {
+            for (let x = 0; x < txnReceipt.logs.length; x++) {
                 try {
+                    if (txnReceipt.logs[x].address.toLowerCase() !== this.contract.address.toLowerCase()) continue;
                     const chainData = this.chainInterface.parseLog(txnReceipt.logs[x]);
-                    if(
-                        txnReceipt.logs[x].address   === chainsConfig[this.chainId].message &&
-                        txnReceipt.transactionHash   === message.transactionHash &&
-                        chainData.args.sender        === message.values.sender &&
-                        chainData.args.recipient     === message.values.recipient &&
-                        chainData.args.express       === message.values.express &&
-                        chainData.args.data          === message.values.encodedData &&
+
+                    if (
+                        txnReceipt.logs[x].address.toLowerCase() === chainsConfig[this.chainId].message.toLowerCase() &&
+                        txnReceipt.transactionHash.toLowerCase() === message.transactionHash.toLowerCase() &&
+                        chainData.args.sender.toLowerCase() === message.values.sender.toLowerCase() &&
+                        chainData.args.recipient.toLowerCase() === message.values.recipient.toLowerCase() &&
+                        chainData.args.express === message.values.express &&
+                        chainData.args.data === message.values.encodedData &&
                         chainData.args.confirmations === message.values.confirmations &&
-                        ethers.utils.formatUnits(chainData.args.txId, 0) === message.values.txId &&
-                        ethers.utils.formatUnits(chainData.args.chain, 0) === message.values.chain
+                        chainData.args.txId.toString() === message.values.txId.toString() &&
+                        chainData.args.chain.toString() === message.values.chain.toString()
                     ) {
                         return true; // we have a match, message is valid
-                    }  else {
+                    } else {
                         console.log('no match', chainData.args, message.values);
                         return false;
                     }
-                } catch(err: any) {
-                    if(err.reason !== 'no matching event') console.log(err);
+                } catch (err: any) {
+                    if (err.reason !== 'no matching event') console.log(err);
                 }
             }
 
             return false;
-        } catch(err) {
+        } catch (err) {
             console.log('error validating message');
             console.log(err);
             return false;
@@ -104,7 +105,7 @@ export default class DriverEVM extends DriverBase {
     async isMessageProcessed(message: IMessage): Promise<boolean> {
         try {
             return await this.contract.processedTransfers(message.values!.txId);
-        } catch(err) {
+        } catch (err) {
             console.log('error checking if message is processed');
             console.log(err);
             return false;
@@ -126,7 +127,7 @@ export default class DriverEVM extends DriverBase {
         const featureLog = txnReceipt.logs.find((l: any) => l.topics[0] === featureTopic);
         const messageLog = txnReceipt.logs.find((l: any) => l.topics[0] === messageTopic);
 
-        if(featureLog) {
+        if (featureLog) {
             logDebug(this.chainId, 'feature log found');
             const featureRequest = this.featureInterface.decodeEventLog(featureTopic, featureLog.data);
 
@@ -136,7 +137,7 @@ export default class DriverEVM extends DriverBase {
             logDebug(this.chainId, 'no feature log found');
         }
 
-        if(messageLog) {
+        if (messageLog) {
             logDebug(this.chainId, 'message log found');
             const messageRequest = this.chainInterface.decodeEventLog(messageTopic, messageLog.data);
 
