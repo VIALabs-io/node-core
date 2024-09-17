@@ -79,9 +79,6 @@ export default class DriverEVM extends DriverBase {
                         chainData.args.chain.toString() === message.values.chain.toString()
                     ) {
                         return true; // we have a match, message is valid
-                    } else {
-                        console.log('no match', chainData.args, message.values);
-                        return false;
                     }
                 } catch (err: any) {
                     if (err.reason !== 'no matching event') console.log(err);
