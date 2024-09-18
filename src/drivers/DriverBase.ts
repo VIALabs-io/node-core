@@ -76,18 +76,18 @@ abstract class DriverBase implements IDriverBase {
         if(message.transactionHash === undefined) return;
         if(message.values === undefined) return;
 
-        if(typeof(this.signatures[message.transactionHash]) !== 'undefined') {
+        if(typeof(this.signatures[message.values.txId]) !== 'undefined') {
             // we have seen this request before
-            if(this.signatures[message.transactionHash] === "locked") {
+            if(this.signatures[message.values.txId] === "locked") {
                 // we are still working on it
             } else {
                 // we have a signature, lets send it
                 message.type   = 'MESSAGE:SIGNED';
                 message.author = this.nodePublicKey;
-                message.signature = this.signatures[message.transactionHash];
+                message.signature = this.signatures[message.values.txId];
                 message.signer = this.nodeSigner.address;
-                if(this.featureReplies[message.transactionHash] !== undefined) {
-                    message.featureReply = this.featureReplies[message.transactionHash];
+                if(this.featureReplies[message.values.txId] !== undefined) {
+                    message.featureReply = this.featureReplies[message.values.txId];
                 }
                 this.vladiator.sendMessage(message);
             }
@@ -95,7 +95,7 @@ abstract class DriverBase implements IDriverBase {
         }
 
         // lock this thread, we're processing it
-        this.signatures[message.transactionHash] = "locked";
+        this.signatures[message.values.txId] = "locked";
 
         const destChainId = Number(message.values.chain);
         const destDriver = this.vladiator.drivers[destChainId];
@@ -125,7 +125,7 @@ abstract class DriverBase implements IDriverBase {
             // process any features
 
             if(message.featureId !== undefined) {
-                logDebug(this.chainId, 'feature start ('+message.featureId+') ' + message.transactionHash);
+                logDebug(this.chainId, 'feature start ('+message.featureId+') ' + message.transactionHash + ' ' + message.values.txId);
 
                 message.type   = 'FEATURE:START';
                 message.author = this.nodePublicKey;
@@ -137,7 +137,7 @@ abstract class DriverBase implements IDriverBase {
                         throw new Error('feature failed');
                     } else {
                         if(message.featureReply !== undefined) {
-                            this.featureReplies[message.transactionHash] = message.featureReply;
+                            this.featureReplies[message.values.txId] = message.featureReply;
                         }
                     }
                 } catch(err) {
@@ -151,12 +151,12 @@ abstract class DriverBase implements IDriverBase {
                 message.type   = 'FEATURE:COMPLETED';
                 message.author = this.nodePublicKey;
                 this.vladiator.sendMessage(message);
-                logDebug(this.chainId, 'feature complete' + message.transactionHash);
+                logDebug(this.chainId, 'feature complete' + message.transactionHash + ' ' + message.values.txId);
             } else {
-                logDebug(this.chainId, 'no feature ' + message.transactionHash);
+                logDebug(this.chainId, 'no feature ' + message.transactionHash + ' ' + message.values.txId);
             }
 
-            this.signatures[message.transactionHash] = await this.vladiator.drivers[message.values!.chain].signTransactionData({
+            this.signatures[message.values.txId] = await this.vladiator.drivers[message.values!.chain].signTransactionData({
                 txId: message.values.txId,
                 sourceChainId: this.chainId,
                 destChainId: message.values.chain,
@@ -166,11 +166,11 @@ abstract class DriverBase implements IDriverBase {
             });
 
             // send message if we have a good signature
-            if(this.signatures[message.transactionHash]) {
+            if(this.signatures[message.values.txId]) {
                 message.type   = 'MESSAGE:SIGNED';
                 message.author = this.nodePublicKey;
                 message.signer = this.nodeSigner.address;
-                message.signature = this.signatures[message.transactionHash];
+                message.signature = this.signatures[message.values.txId];
                 this.vladiator.sendMessage(message);
             }
         } else {

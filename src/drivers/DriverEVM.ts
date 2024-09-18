@@ -58,7 +58,7 @@ export default class DriverEVM extends DriverBase {
             if (txnReceipt.confirmations < message.values.confirmations) {
                 // something went wrong if we get here, abort
                 console.log('abort wait for confirmations');
-                delete (this.signatures[message.transactionHash]);
+                delete (this.signatures[message.values.txId]);
                 return false;
             }
 
