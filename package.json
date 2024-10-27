@@ -21,7 +21,8 @@
 	"license": "UNLICENSED",
 	"private": false,
 	"dependencies": {
-	  "@vialabs-io/contracts": "https://github.com/VIALabs-io/contracts.git",
+	  "@vialabs-io/contracts": "file:../npm-contracts",
+	  "@vialabs-io/npm-registry": "file:../npm-registry",
 	  "@chainsafe/libp2p-gossipsub": "^6.1.0",
 	  "@chainsafe/libp2p-noise": "^11.0.0",
 	  "@libp2p/bootstrap": "^6.0.0",
@@ -59,5 +60,4 @@
 	  "./utils/*": "./dist/utils/*.js",
 	  ".": "./dist/index.js"
 	}
-  }
-  
+}

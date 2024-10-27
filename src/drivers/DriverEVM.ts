@@ -3,7 +3,7 @@
 
 import { ethers } from "ethers";
 import { IMessage } from "../types/IMessage.js";
-import chainsConfig from "@vialabs-io/contracts/config/chains.js";
+import { getChainConfig } from "@vialabs-io/npm-registry";
 import DriverBase from "./DriverBase.js";
 import { logDebug } from "../utils/logDebug.js";
 
@@ -34,8 +34,12 @@ export default class DriverEVM extends DriverBase {
      */
     async connect(rpcAddress: string): Promise<void> {
         try {
+            const chainConfig = getChainConfig(this.chainId);
+            if (!chainConfig || !chainConfig.message) {
+                throw new Error(`No chain config or message contract found for chainId ${this.chainId}`);
+            }
             this.provider = new ethers.providers.StaticJsonRpcProvider(rpcAddress);
-            this.contract = new ethers.Contract(chainsConfig[this.chainId].message, this.chainInterface, this.provider);
+            this.contract = new ethers.Contract(chainConfig.message, this.chainInterface, this.provider);
         } catch (err) {
             console.log('error connecting to RPC for ' + this.chainId + ' (' + rpcAddress + ')')
             console.log(err);
@@ -62,13 +66,18 @@ export default class DriverEVM extends DriverBase {
                 return false;
             }
 
+            const chainConfig = getChainConfig(this.chainId);
+            if (!chainConfig || !chainConfig.message) {
+                throw new Error(`No chain config or message contract found for chainId ${this.chainId}`);
+            }
+
             for (let x = 0; x < txnReceipt.logs.length; x++) {
                 try {
                     if (txnReceipt.logs[x].address.toLowerCase() !== this.contract.address.toLowerCase()) continue;
                     const chainData = this.chainInterface.parseLog(txnReceipt.logs[x]);
 
                     if (
-                        txnReceipt.logs[x].address.toLowerCase() === chainsConfig[this.chainId].message.toLowerCase() &&
+                        txnReceipt.logs[x].address.toLowerCase() === chainConfig.message.toLowerCase() &&
                         txnReceipt.transactionHash.toLowerCase() === message.transactionHash.toLowerCase() &&
                         chainData.args.sender.toLowerCase() === message.values.sender.toLowerCase() &&
                         chainData.args.recipient.toLowerCase() === message.values.recipient.toLowerCase() &&
