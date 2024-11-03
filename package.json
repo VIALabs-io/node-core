@@ -21,8 +21,8 @@
 	"license": "UNLICENSED",
 	"private": false,
 	"dependencies": {
-	  "@vialabs-io/contracts": "file:../npm-contracts",
-	  "@vialabs-io/npm-registry": "file:../npm-registry",
+	  "@vialabs-io/contracts": "github:VIALabs-io/npm-contracts",
+	  "@vialabs-io/npm-registry": "github:VIALabs-io/npm-registry",
 	  "@chainsafe/libp2p-gossipsub": "^6.1.0",
 	  "@chainsafe/libp2p-noise": "^11.0.0",
 	  "@libp2p/bootstrap": "^6.0.0",
