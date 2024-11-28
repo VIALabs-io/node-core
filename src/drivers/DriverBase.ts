@@ -6,6 +6,7 @@ import { IVladiator } from "../types/IVladiator.js";
 import { IMessage } from "../types/IMessage.js";
 import { logDebug } from "../utils/logDebug.js";
 import { IDriverBase } from "../types/IDriverBase.js";
+import { Provider } from "@reef-chain/evm-provider";
 
 /**
  * Abstract base class for all driver types within the VIA Labs system, providing a common framework for interacting with different blockchains.
@@ -17,7 +18,7 @@ abstract class DriverBase implements IDriverBase {
     protected featureReplies: Record<string, string> = {};  // Cache for feature replies from project nodes
     public nodeSigner!: ethers.Wallet;  // Ethers.js wallet instance for the node.
     public chainId: number;             // Chain ID associated with the driver instance.
-    public provider!: ethers.providers.JsonRpcProvider; // Ethers provider for interacting with the blockchain.
+    public provider!: ethers.providers.JsonRpcProvider | Provider; // Ethers provider for interacting with the blockchain.
     public vladiator: IVladiator;       // Reference to the main Vladiator instance managing this driver.
 
     /**
