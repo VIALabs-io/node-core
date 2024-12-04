@@ -1,6 +1,7 @@
 // Copyright 2021-2024 Atlas
 // Author: Atlas (atlas@vialabs.io)
 
+// @ts-nocheck
 import { ethers } from "ethers";
 import { IMessage } from "../types/IMessage.js";
 import { getChainConfig } from "@vialabs-io/npm-registry";
@@ -13,8 +14,8 @@ import { ApiPromise, WsProvider, Keyring } from "@polkadot/api";
 import { SignedBlock } from "@polkadot/types/interfaces/runtime";
 import { SignerPayloadRaw } from "@polkadot/types/types";
 
-type ReefSigner = Signer & { address: string };
-type ReefSigningKey = TestAccountSigningKey & { signRaw: (inp: SignerPayloadRaw) => Promise<{ id: number; signature: `0x${string}` | string }> };
+type ReefSigner = Signer & { address: string; lastBaseFeePerGas: null | BigInt };
+type ReefSigningKey = TestAccountSigningKey & { signRaw: (inp: SignerPayloadRaw) => Promise<{ id: number; signature: `0x${string}` }> };
 type ReefLogDescription = ethers.utils.LogDescription & {
     extrinsicId?: number;
     blockHash?: string;
@@ -67,7 +68,7 @@ export default class DriverReef extends DriverBase {
 
                 const flatSig = await wallet.signMessage(message);
 
-                return { id: 0, signature: flatSig };
+                return { id: 0, signature: flatSig } as { id: number; signature: `0x${string}` };
             };
 
             const signer = new Signer(this.provider, pair.address, signingKey) as ReefSigner;
@@ -111,6 +112,7 @@ export default class DriverReef extends DriverBase {
 
             // this.nodeSigner = signer;
             // this.nodePublicKey = this.nodeSigner.address;
+            signer.lastBaseFeePerGas = BigInt("1");
 
             this.contract = new ethers.Contract(chainConfig.message, this.chainInterface, signer);
         } catch (err) {
