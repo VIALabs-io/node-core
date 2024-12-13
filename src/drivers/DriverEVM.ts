@@ -7,6 +7,7 @@ import { IMessage } from "../types/IMessage.js";
 import { getChainConfig } from "@vialabs-io/npm-registry";
 import DriverBase from "./DriverBase.js";
 import { logDebug } from "../utils/logDebug.js";
+import { NetworkConfig } from "../types/IChainConfig.js";
 
 /**
  * A blockchain driver for EVM-based chains with additional methods to handle message validation and processing.
@@ -29,20 +30,20 @@ export default class DriverEVM extends DriverBase {
     ]);
 
     /**
-     * Connects to the blockchain network using the provided RPC address.
+     * Connects to the blockchain network using the provided chain configuration.
      * 
-     * @param rpcAddress - The RPC URL to connect to.
+     * @param chainConfig - The network configuration containing RPC and other settings.
      */
-    async connect(rpcAddress: string): Promise<void> {
+    async connect(chainConfig: NetworkConfig): Promise<void> {
         try {
-            const chainConfig = getChainConfig(this.chainId);
-            if (!chainConfig || !chainConfig.message) {
+            const registryConfig = getChainConfig(this.chainId);
+            if (!registryConfig || !registryConfig.message) {
                 throw new Error(`No chain config or message contract found for chainId ${this.chainId}`);
             }
-            this.provider = new ethers.providers.StaticJsonRpcProvider(rpcAddress);
-            this.contract = new ethers.Contract(chainConfig.message, this.chainInterface, this.provider);
+            this.provider = new ethers.providers.StaticJsonRpcProvider(chainConfig.rpc);
+            this.contract = new ethers.Contract(registryConfig.message, this.chainInterface, this.provider);
         } catch (err) {
-            console.log('error connecting to RPC for ' + this.chainId + ' (' + rpcAddress + ')')
+            console.log('error connecting to RPC for ' + this.chainId + ' (' + chainConfig.rpc + ')')
             console.log(err);
         }
     }
