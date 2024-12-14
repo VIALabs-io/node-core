@@ -1,64 +1,69 @@
 {
-	"name": "@vialabs-io/node-core",
-	"version": "0.5.0",
-	"description": "Core functionality for VIALabs node operations",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
-	"type": "module",
-	"files": [
-	  "dist/**/*"
-	],
-	"scripts": {
-	  "build": "tsc -p tsconfig.json",
-	  "clean": "rimraf dist",
-	  "prepare": "npm run build"
-	},
-	"repository": {
-	  "type": "git",
-	  "url": "https://github.com/VIALabs-io/node-core.git"
-	},
-	"author": "Atlas",
-	"license": "UNLICENSED",
-	"private": false,
-	"dependencies": {
-	  "@vialabs-io/contracts": "github:VIALabs-io/npm-contracts",
-	  "@vialabs-io/npm-registry": "github:VIALabs-io/npm-registry",
-      "@reef-chain/evm-provider": "^3.0.0",
-	  "@chainsafe/libp2p-gossipsub": "^6.1.0",
-	  "@chainsafe/libp2p-noise": "^11.0.0",
-	  "@libp2p/bootstrap": "^6.0.0",
-	  "@libp2p/mplex": "^7.1.1",
-	  "@libp2p/tcp": "^6.1.2",
-	  "@types/figlet": "^1.5.8",
-	  "chalk": "^5.2.0",
-	  "discord.js": "^14.14.1",
-	  "dotenv": "^16.0.3",
-	  "ethers": "5.7.2",
-	  "express": "^4.19.2",
-	  "figlet": "^1.5.2",
-	  "fixed-width-string": "^2.0.0",
-	  "globals": "^15.0.0",
-	  "libp2p": "^0.42.2",
-	  "rimraf": "^3.0.2",
-	  "sha1": "^1.1.1",
-	  "snappyjs": "^0.7.0",
-	  "socket.io": "^4.7.5",
-	  "socket.io-client": "^4.7.5",
-	  "ts-node": "^10.9.1",
-	  "tsx": "^4.7.0"
-	},
-	"devDependencies": {
-	  "@types/express": "^4.17.21",
-	  "@types/node": "^20.12.7",
-	  "@types/socket.io": "^3.0.2",
-	  "typescript": "^5.4.5"
-	},
-	"exports": {
-	  "./Vladiator": "./dist/Vladiator.js",
-	  "./DataStreamClient": "./dist/DataStreamClient.js",
-	  "./drivers/*": "./dist/drivers/*.js",
-	  "./types/*": "./dist/types/*.js",
-	  "./utils/*": "./dist/utils/*.js",
-	  ".": "./dist/index.js"
-	}
+  "name": "@vialabs-io/node-core",
+  "version": "0.5.0",
+  "description": "Core functionality for VIALabs node operations",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VIALabs-io/node-core.git"
+  },
+  "author": "Atlas",
+  "license": "UNLICENSED",
+  "private": false,
+  "dependencies": {
+    "@chainsafe/libp2p-gossipsub": "^14.1.0",
+    "@chainsafe/libp2p-noise": "^16.0.0",
+    "@chainsafe/libp2p-yamux": "^7.0.1",
+    "@libp2p/bootstrap": "^11.0.16",
+    "@libp2p/identify": "^3.0.14",
+    "@libp2p/interface-connection": "^5.1.1",
+    "@libp2p/interface-peer-id": "^2.0.2",
+    "@libp2p/interface-pubsub": "^4.0.1",
+    "@libp2p/kad-dht": "^14.1.6",
+    "@libp2p/mplex": "^11.0.16",
+    "@libp2p/tcp": "^10.0.14",
+    "@libp2p/websockets": "^9.1.0",
+    "@reef-chain/evm-provider": "^3.0.0",
+    "@vialabs-io/contracts": "github:VIALabs-io/npm-contracts",
+    "@vialabs-io/npm-registry": "github:VIALabs-io/npm-registry",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.0.3",
+    "ethers": "5.7.2",
+    "express": "^4.21.1",
+    "figlet": "^1.5.2",
+    "fixed-width-string": "^2.0.0",
+    "libp2p": "^2.4.2",
+    "rimraf": "^3.0.2",
+    "sha1": "^1.1.1",
+    "snappyjs": "^0.7.0",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5",
+    "ts-node": "^10.9.1",
+    "tsx": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/figlet": "^1.5.8",
+    "@types/node": "^20.12.7",
+    "@types/socket.io": "^3.0.2",
+    "typescript": "^5.4.5"
+  },
+  "exports": {
+    "./Vladiator": "./dist/Vladiator.js",
+    "./DataStreamClient": "./dist/DataStreamClient.js",
+    "./drivers/*": "./dist/drivers/*.js",
+    "./types/*": "./dist/types/*.js",
+    "./utils/*": "./dist/utils/*.js",
+    ".": "./dist/index.js"
+  }
 }

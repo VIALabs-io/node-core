@@ -8,21 +8,29 @@ interface IMessage {
     type: string;                       // The type of message (e.g., request, response)
     author: string;                     // The author or initiator of the message
 
-    source?: number;                    // Source chain ID, optional
-    transactionHash?: string;           // Transaction hash, optional
-    executionHash?: string;             // Execution hash, optional
+    source?: number;                    // Source chain ID
+    transactionHash?: string;           // Transaction hash
+    executionHash?: string;             // Execution hash
+
+    sourceGas?: string;                 // Gas cost on source chain
+    sourceTimestamp?: number;           // Timestamp of source transaction
+    destGas?: string;                   // Gas cost on destination chain
+    destTimestamp?: number;             // Timestamp of destination transaction
+    destGasRefund?: string;             // Gas refund on destination chain
+    tokenPrice?: string;                // Token price at execution
+    validatorBalance?: string;          // Validator's balance
 
     /**
      * Values associated with the message, providing details about the transaction.
      */
     values?: {
-        txId: string;                   // Transaction identifier
-        sender: string;                 // Sender's address
-        recipient: string;              // Recipient's address
-        chain: string;                  // Destination chain ID
-        express: boolean;               // Whether the transaction is express
-        encodedData: string;            // Encoded data sent with the transaction
-        confirmations: number;          // Number of confirmations required
+        txId: string;                   // Transaction identifier (uint256 0)
+        sender: string;                 // Sender's address (string 1)
+        recipient: string;              // Recipient's address (string 2)
+        chain: string;                  // Destination chain ID (uint256 3)
+        express: boolean;               // Whether the transaction is express (bool 4)
+        encodedData: string;            // Encoded data sent with the transaction (string 5)
+        confirmations: number;          // Number of confirmations required (uint16 6)
     };
 
     featureId?: number;                // Optional feature ID for extended functionality

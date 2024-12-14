@@ -4,6 +4,7 @@
 import { ethers } from "ethers";
 import { IMessage } from "./IMessage.js";
 import { IVladiator } from "./IVladiator.js";
+import { NetworkConfig } from "./IChainConfig.js";
 
 /**
  * Interface for DriverBase classes that manage blockchain interactions.
@@ -17,10 +18,10 @@ interface IDriverBase {
     vladiator: IVladiator;
 
     /**
-     * Connects to a blockchain using a specified RPC address.
-     * @param rpcAddress The RPC URL to connect to the blockchain node.
+     * Connects to a blockchain using the provided network configuration.
+     * @param chainConfig The network configuration containing RPC and other settings.
      */
-    connect(rpcAddress: string): Promise<void>;
+    connect(chainConfig: NetworkConfig): Promise<void>;
 
     /**
      * Validates if a given message is correctly structured and safe to process.

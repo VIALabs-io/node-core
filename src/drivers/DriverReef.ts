@@ -13,6 +13,7 @@ import { TestAccountSigningKey, Provider, Signer } from "@reef-chain/evm-provide
 import { ApiPromise, WsProvider, Keyring } from "@polkadot/api";
 import { SignedBlock } from "@polkadot/types/interfaces/runtime";
 import { SignerPayloadRaw } from "@polkadot/types/types";
+import { NetworkConfig } from "../types/IChainConfig.js";
 
 type ReefSigner = Signer & { address: string; lastBaseFeePerGas: null | BigInt };
 type ReefSigningKey = TestAccountSigningKey & { signRaw: (inp: SignerPayloadRaw) => Promise<{ id: number; signature: `0x${string}` }> };
@@ -28,7 +29,7 @@ type ReefLogDescription = ethers.utils.LogDescription & {
 type ReefFee = { partial: BigInt; base: BigInt; adjusted: BigInt; estimatedWeight: BigInt };
 
 /**
- * A blockchain driver for EVM-based chains with additional methods to handle message validation and processing.
+ * A blockchain driver for Reef Chain with additional methods to handle message validation and processing.
  */
 export default class DriverReef extends DriverBase {
     public provider!: Provider; // WS RPC provider for network interaction
@@ -89,19 +90,19 @@ export default class DriverReef extends DriverBase {
     }
 
     /**
-     * Connects to the blockchain network using the provided RPC address.
+     * Connects to the blockchain network using the provided chain configuration.
      *
-     * @param rpcAddress - The RPC URL to connect to.
+     * @param chainConfig - The network configuration containing RPC and other settings.
      */
-    async connect(rpcAddress: string): Promise<void> {
+    async connect(chainConfig: NetworkConfig): Promise<void> {
         try {
-            const chainConfig = getChainConfig(this.chainId);
-            if (!chainConfig || !chainConfig.message) {
+            const registryConfig = getChainConfig(this.chainId);
+            if (!registryConfig || !registryConfig.message) {
                 throw new Error(`No chain config or message contract found for chainId ${this.chainId}`);
             }
 
             this.provider = new Provider({
-                provider: new WsProvider(rpcAddress),
+                provider: new WsProvider(chainConfig.rpc),
             });
 
             // @note Connect first then we can interact
@@ -110,13 +111,11 @@ export default class DriverReef extends DriverBase {
             const signer = await this.getSigner();
             if (!signer) return console.log("No signer available");
 
-            // this.nodeSigner = signer;
-            // this.nodePublicKey = this.nodeSigner.address;
             signer.lastBaseFeePerGas = BigInt("1");
 
-            this.contract = new ethers.Contract(chainConfig.message, this.chainInterface, signer);
+            this.contract = new ethers.Contract(registryConfig.message, this.chainInterface, signer);
         } catch (err) {
-            console.log("error connecting to RPC for " + this.chainId + " (" + rpcAddress + ")");
+            console.log("error connecting to RPC for " + this.chainId + " (" + chainConfig.rpc + ")");
             console.log(err);
         }
     }
