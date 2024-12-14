@@ -28,9 +28,17 @@ if (typeof CustomEvent === 'undefined') {
     };
 }
 
+interface RecentMessage {
+    timestamp: number;
+    author: string;
+    transactionHash: string;
+    type: string;
+}
+
 export class ServiceP2P {
     private libp2p!: Libp2p
     private debug: boolean
+    private recentMessages: RecentMessage[] = []
 
     constructor(private messageHandler: (topic: string, message: IMessage) => void) {
         this.debug = process.env.DEBUG === 'true'
@@ -179,7 +187,7 @@ export class ServiceP2P {
                 // Monitor connection status
                 setInterval(() => {
                     this.reconnectBootstrap(bootstrapers);
-                }, 10000);
+                }, 30000);
                 this.reconnectBootstrap(bootstrapers);
 
             } catch (error) {
@@ -193,23 +201,29 @@ export class ServiceP2P {
         }
     }
 
-    private reconnectBootstrap(bootstrapers: any[]) {
+    private reconnectBootstrap(bootstrapers: string[]) {
         const connections = this.libp2p.getConnections()
-        if (connections.length === 0) {
-            console.log('No active connections, attempting to dial bootstrap peers...')
-            if (bootstrapers.length > 0) {
-                bootstrapers.forEach(addr => {
-                    try {
-                        console.log('Dialing bootstrap peer:', addr)
-                        const ma = multiaddr(addr)
-                        this.libp2p.dial(ma).catch(err => {
-                            this.logError('Failed to dial bootstrap peer:', err.message)
-                        })
-                    } catch (err) {
-                        this.logError('Invalid multiaddr:', err)
+        const ownPeerId = this.libp2p.peerId.toString()
+        if (bootstrapers.length > 0) {
+            bootstrapers.forEach(addr => {
+                try {
+                    const ma = multiaddr(addr)
+                    const peerId = ma.getPeerId()
+                    
+                    // Check if this is not our own peer ID and if we're not already connected
+                    if (peerId && peerId !== ownPeerId) {
+                        const isConnected = connections.some(conn => conn.remotePeer.toString() === peerId)
+                        
+                        if (!isConnected) {
+                            this.libp2p.dial(ma).catch(err => {
+                                this.logError('Failed to dial bootstrap peer:', err.message)
+                            })
+                        }
                     }
-                })
-            }
+                } catch (err) {
+                    this.logError('Invalid multiaddr:', err)
+                }
+            })
         }
     }
 
@@ -291,11 +305,38 @@ export class ServiceP2P {
                     return
                 }
 
-                this.messageHandler(topic, message)
+                this.handleMessage(topic, message)
             } catch (error) {
                 this.logError('Error in pubsub message event:', error)
             }
         })
+    }
+
+    private handleMessage(topic: string, message: IMessage): void {
+        const currentTime = Date.now()
+        const transactionHash = message.transactionHash || ''
+        const author = message.author || ''
+
+        // Clean up old messages
+        this.recentMessages = this.recentMessages.filter(m => currentTime - m.timestamp <= 5000)
+
+        if (topic === 'MESSAGE:SIGNED' || topic === 'MESSAGE:REQUEST') {
+            const isDuplicate = this.recentMessages.some(m => 
+                m.type === topic &&
+                m.author === author && 
+                m.transactionHash === transactionHash && 
+                (topic === 'MESSAGE:SIGNED' || (topic === 'MESSAGE:REQUEST' && currentTime - m.timestamp <= 5000))
+            )
+
+            if (isDuplicate) {
+                //this.log(`Ignoring duplicate ${topic} from ${author} with hash ${transactionHash}`)
+                return
+            }
+
+            this.recentMessages.push({ timestamp: currentTime, author, transactionHash, type: topic })
+        }
+
+        this.messageHandler(topic, message)
     }
 
     async sendMessage(message: IMessage): Promise<void> {

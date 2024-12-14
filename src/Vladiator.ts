@@ -163,28 +163,20 @@ export class Vladiator implements IVladiator {
 
         if (message.type === 'PENALTY:CHAINMISS') return;
         if (this.drivers[message.source!] === undefined) {
-            if (message.source == 1010101010) return;
-            message.type = 'PENALTY:CHAINMISS';
-            message.author = this.nodePublicKey;
-            this.sendMessage(message);
             return;
         }
         const driver = this.drivers[message.source!];
     
         if (topic === 'MESSAGE:REQUEST') {
-            if (message.featureId !== undefined) {
+            // If this is a feature message but we don't support this feature, ignore it
+            if (message.featureId !== undefined && this.features[message.featureId] !== undefined) {
                 message.type = 'FEATURE:START';
                 message.author = this.nodePublicKey;
                 this.sendMessage(message);
 
                 try {
-                    if (this.features[message.featureId] === undefined) {
-                        console.log('feature not found', message.featureId);
-                        message.featureFailed = true;
-                    } else {
-                        message = await this.features[message.featureId].process(driver, message);
-                    }
-
+                    message = await this.features[message.featureId].process(driver, message);
+                    
                     if (message.featureFailed) {
                         message.type = 'FEATURE:FAILED';
                         message.author = this.nodePublicKey;
