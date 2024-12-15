@@ -10,7 +10,6 @@ import { ServiceHeartbeat } from "./services/ServiceHeartbeat.js";
 import { logTraffic } from "./utils/logTraffic.js";
 import DriverBase from "./drivers/DriverBase.js";
 import DriverEVM from "./drivers/DriverEVM.js";
-import DriverReef from "./drivers/DriverReef.js";
 import DataStreamServer from "./DataStreamServer.js";
 import { join } from "path";
 import { cwd } from "process";
@@ -210,7 +209,6 @@ export class Vladiator implements IVladiator {
             const chainId = parseInt(chainConfig.id);
             switch(chainConfig.type) {
                 case 'EVMMV3': this.drivers[chainId] = new DriverEVM(this, chainId); break;
-                case 'Reef': this.drivers[chainId] = new DriverReef(this, chainId); break;
                 default: console.log('unknown driver type', chainConfig.type); return;
             }
 

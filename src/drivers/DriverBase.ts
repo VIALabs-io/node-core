@@ -6,13 +6,12 @@ import { IVladiator } from "../types/IVladiator.js";
 import { IMessage } from "../types/IMessage.js";
 import { logDebug } from "../utils/logDebug.js";
 import { NetworkConfig } from "../types/IChainConfig.js";
-import { Signer } from '@reef-chain/evm-provider';
 
 /**
  * Abstract base class for all driver types within the VIA Labs system, providing a common framework for interacting with different blockchains.
  */
 abstract class DriverBase {
-    public nodeSigner!: ethers.Wallet | (Signer & {address: string});
+    public nodeSigner!: ethers.Wallet | (ethers.Signer & {address: string});
     protected nodePrivateKey!: string;
     protected nodePublicKey!: string;
     protected signatures: Record<string, string> = {};
