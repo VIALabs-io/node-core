@@ -11,7 +11,7 @@ import { NetworkConfig } from "../types/IChainConfig.js";
  * Abstract base class for all driver types within the VIA Labs system, providing a common framework for interacting with different blockchains.
  */
 abstract class DriverBase {
-    public nodeSigner!: ethers.Wallet | (ethers.Signer & {address: string});
+    public nodeSigner!: ethers.Wallet;
     protected nodePrivateKey!: string;
     protected nodePublicKey!: string;
     protected signatures: Record<string, string> = {};
@@ -142,11 +142,12 @@ abstract class DriverBase {
         recipient: string,
         data: string
     }): Promise<string> {
-        const messageHash = ethers.utils.defaultAbiCoder.encode(
+        const messageHash = ethers.AbiCoder.defaultAbiCoder().encode(
             ["uint256", "uint256", "uint256", "address", "address", "bytes"],
             [txData.txId, txData.sourceChainId, txData.destChainId, txData.sender, txData.recipient, txData.data]
         );
-        const signature = await this.nodeSigner.signMessage(ethers.utils.arrayify(ethers.utils.keccak256(messageHash)));
+        const messageHashBytes = ethers.getBytes(ethers.keccak256(messageHash));
+        const signature = await this.nodeSigner.signMessage(messageHashBytes);
         logDebug(this.chainId, 'signed ' + txData.txId + ' ' + signature);
 
         return signature;

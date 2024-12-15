@@ -13,9 +13,9 @@ import { NetworkConfig } from "../types/IChainConfig.js";
  * A blockchain driver for EVM-based chains with additional methods to handle message validation and processing.
  */
 export default class DriverEVM extends DriverBase {
-    public provider!: ethers.providers.JsonRpcProvider;  // JSON RPC provider for network interaction
+    public provider!: ethers.JsonRpcProvider;  // JSON RPC provider for network interaction
     private contract!: ethers.Contract;  // Smart contract interaction handler
-    private chainInterface = new ethers.utils.Interface([  // Interface for interpreting blockchain events and function calls
+    private chainInterface = new ethers.Interface([  // Interface for interpreting blockchain events and function calls
         "event SendRequested(uint txId, address sender, address recipient, uint chain, bool express, bytes data, uint16 confirmations)",
         "event SendProcessed(uint txId, uint sourceChainId, address sender, address recipient)",
         "event Success(uint txId, uint sourceChainId, address sender, address recipient, uint amount)",
@@ -24,7 +24,7 @@ export default class DriverEVM extends DriverBase {
         "function chainsig() view returns (address)",
         "function exsig(address project) view returns (address)"
     ]);
-    private featureInterface = new ethers.utils.Interface([  // Interface for handling features related to blockchain transactions
+    private featureInterface = new ethers.Interface([  // Interface for handling features related to blockchain transactions
         "function process(uint txId, uint sourceChainId, uint destChainId, address sender, address recipient, uint gas, uint32 featureId, bytes calldata featureReply, bytes[] calldata data) external",
         "event SendMessageWithFeature(uint txId, uint destinationChainId, uint32 featureId, bytes featureData)"
     ]);
@@ -40,7 +40,7 @@ export default class DriverEVM extends DriverBase {
             if (!registryConfig || !registryConfig.message) {
                 throw new Error(`No chain config or message contract found for chainId ${this.chainId}`);
             }
-            this.provider = new ethers.providers.StaticJsonRpcProvider(chainConfig.rpc);
+            this.provider = new ethers.JsonRpcProvider(chainConfig.rpc);
             this.contract = new ethers.Contract(registryConfig.message, this.chainInterface, this.provider);
         } catch (err) {
             console.log('error connecting to RPC for ' + this.chainId + ' (' + chainConfig.rpc + ')')
@@ -59,9 +59,11 @@ export default class DriverEVM extends DriverBase {
             if (message?.transactionHash === undefined) return false;
             if (message?.values === undefined) return false;
 
-            let txnReceipt = await this.provider.waitForTransaction(message.transactionHash, message.values.confirmations);
+            let txnReceipt = await this.provider.getTransactionReceipt(message.transactionHash);
+            if (!txnReceipt) return false;
 
-            if (txnReceipt.confirmations < message.values.confirmations) {
+            const confirmations = await txnReceipt.confirmations();
+            if (confirmations < message.values.confirmations) {
                 // something went wrong if we get here, abort
                 console.log('abort wait for confirmations');
                 delete (this.signatures[message.values.txId]);
@@ -73,26 +75,32 @@ export default class DriverEVM extends DriverBase {
                 throw new Error(`No chain config or message contract found for chainId ${this.chainId}`);
             }
 
-            for (let x = 0; x < txnReceipt.logs.length; x++) {
+            for (const log of txnReceipt.logs) {
                 try {
-                    if (txnReceipt.logs[x].address.toLowerCase() !== this.contract.address.toLowerCase()) continue;
-                    const chainData = this.chainInterface.parseLog(txnReceipt.logs[x]);
+                    const contractAddress = this.contract.target.toString().toLowerCase();
+                    if (log.address.toLowerCase() !== contractAddress) continue;
+                    const chainData = this.chainInterface.parseLog({
+                        topics: log.topics,
+                        data: log.data
+                    });
+
+                    if (!chainData) continue;
 
                     if (
-                        txnReceipt.logs[x].address.toLowerCase() === chainConfig.message.toLowerCase() &&
-                        txnReceipt.transactionHash.toLowerCase() === message.transactionHash.toLowerCase() &&
-                        chainData.args.sender.toLowerCase() === message.values.sender.toLowerCase() &&
-                        chainData.args.recipient.toLowerCase() === message.values.recipient.toLowerCase() &&
-                        chainData.args.express === message.values.express &&
-                        chainData.args.data === message.values.encodedData &&
-                        chainData.args.confirmations === message.values.confirmations &&
-                        chainData.args.txId.toString() === message.values.txId.toString() &&
-                        chainData.args.chain.toString() === message.values.chain.toString()
+                        log.address.toLowerCase() === chainConfig.message.toLowerCase() &&
+                        txnReceipt.hash.toLowerCase() === message.transactionHash.toLowerCase() &&
+                        chainData.args[1].toLowerCase() === message.values.sender.toLowerCase() &&
+                        chainData.args[2].toLowerCase() === message.values.recipient.toLowerCase() &&
+                        chainData.args[4] === message.values.express &&
+                        chainData.args[5] === message.values.encodedData &&
+                        chainData.args[6] === message.values.confirmations &&
+                        chainData.args[0].toString() === message.values.txId.toString() &&
+                        chainData.args[3].toString() === message.values.chain.toString()
                     ) {
                         return true; // we have a match, message is valid
                     }
                 } catch (err: any) {
-                    if (err.reason !== 'no matching event') console.log(err);
+                    if (err.message !== 'no matching event') console.log(err);
                 }
             }
 
@@ -130,34 +138,46 @@ export default class DriverEVM extends DriverBase {
     */
     public async populateMessage(message: IMessage): Promise<IMessage> {
         const txnReceipt = await this.provider.getTransactionReceipt(message.transactionHash!);
-        const featureTopic = ethers.utils.id('SendMessageWithFeature(uint256,uint256,uint32,bytes)');
-        const messageTopic = ethers.utils.id('SendRequested(uint256,address,address,uint256,bool,bytes,uint16)');
+        if (!txnReceipt) return message;
+
+        const featureTopic = ethers.id('SendMessageWithFeature(uint256,uint256,uint32,bytes)');
+        const messageTopic = ethers.id('SendRequested(uint256,address,address,uint256,bool,bytes,uint16)');
         const featureLog = txnReceipt.logs.find((l: any) => l.topics[0] === featureTopic);
         const messageLog = txnReceipt.logs.find((l: any) => l.topics[0] === messageTopic);
 
         if (featureLog) {
             logDebug(this.chainId, 'feature log found');
-            const featureRequest = this.featureInterface.decodeEventLog(featureTopic, featureLog.data);
+            const featureRequest = this.featureInterface.parseLog({
+                topics: featureLog.topics,
+                data: featureLog.data
+            });
 
-            message.featureId = Number(featureRequest[2]);
-            message.featureData = featureRequest[3].toString();
+            if (featureRequest) {
+                message.featureId = Number(featureRequest.args[2]);
+                message.featureData = featureRequest.args[3].toString();
+            }
         } else {
             logDebug(this.chainId, 'no feature log found');
         }
 
         if (messageLog) {
             logDebug(this.chainId, 'message log found');
-            const messageRequest = this.chainInterface.decodeEventLog(messageTopic, messageLog.data);
+            const messageRequest = this.chainInterface.parseLog({
+                topics: messageLog.topics,
+                data: messageLog.data
+            });
 
-            message.values = {
-                txId: ethers.BigNumber.from(messageRequest[0]).toString(),
-                sender: messageRequest[1],
-                recipient: messageRequest[2],
-                chain: ethers.BigNumber.from(messageRequest[3]).toString(),
-                express: messageRequest[4],
-                encodedData: messageRequest[5],
-                confirmations: ethers.BigNumber.from(messageRequest[6]).toNumber()
-            };
+            if (messageRequest) {
+                message.values = {
+                    txId: messageRequest.args[0].toString(),
+                    sender: messageRequest.args[1],
+                    recipient: messageRequest.args[2],
+                    chain: messageRequest.args[3].toString(),
+                    express: messageRequest.args[4],
+                    encodedData: messageRequest.args[5],
+                    confirmations: Number(messageRequest.args[6])
+                };
+            }
         } else {
             logDebug(this.chainId, 'no message log found');
         }

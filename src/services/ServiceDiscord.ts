@@ -197,10 +197,10 @@ export class ServiceDiscord {
 
         let srcGasActual, destGasActual, destGasRefund, validatorBalanceETH;
         try {
-            srcGasActual = ethers.utils.formatEther(ethers.BigNumber.from(log.sourceGas));
-            destGasActual = ethers.utils.formatEther(ethers.BigNumber.from(log.destGas));
-            destGasRefund = ethers.utils.formatEther(ethers.BigNumber.from(log.destGasRefund));
-            validatorBalanceETH = ethers.utils.formatEther(ethers.BigNumber.from(log.validatorBalance!));
+            srcGasActual = ethers.formatEther(ethers.getBigInt(log.sourceGas ?? '0'));
+            destGasActual = ethers.formatEther(ethers.getBigInt(log.destGas ?? '0'));
+            destGasRefund = ethers.formatEther(ethers.getBigInt(log.destGasRefund ?? '0'));
+            validatorBalanceETH = ethers.formatEther(ethers.getBigInt(log.validatorBalance ?? '0'));
 
             message += "|  SRC GAS ACTUAL: " + srcGasActual + " \n";
 
