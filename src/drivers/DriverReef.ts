@@ -281,13 +281,15 @@ export default class DriverReef extends DriverBase {
             }
 
             console.log("[REEF INFO] isMessageValid receipt", txnReceipt);
-            console.log("[REEF INFO] Collecting chain config");
+            console.log("[REEF INFO] Collecting chain config", this.chainId);
             const chainConfig = getChainConfig(this.chainId);
+            console.log("[REEF INFO] Chain config", chainConfig);
             if (!chainConfig || !chainConfig.message) {
                 throw new Error(`No chain config or message contract found for chainId ${this.chainId}`);
             }
 
             for (let x = 0; x < txnReceipt.logs.length; x++) {
+                console.log("[REEF INFO] Txreceipt loop index", x, txnReceipt.logs[x]);
                 try {
                     if (txnReceipt.logs[x].address.toLowerCase() !== this.contract.address.toLowerCase()) continue;
                     const chainData = this.chainInterface.parseLog(txnReceipt.logs[x]);
