@@ -4295,7 +4295,7 @@
 
 "@vialabs-io/npm-registry@github:VIALabs-io/npm-registry":
   version "2.0.0"
-  resolved "git+ssh://git@github.com/VIALabs-io/npm-registry.git#8b6773d3d93fed4d9179299d1aa9ef133bb45b49"
+  resolved "git+ssh://git@github.com/VIALabs-io/npm-registry.git#bc86dba90e844dcfdcb430a3994eaf873f929341"
   dependencies:
     axios "^1.7.7"
     ethers "^6.13.4"
