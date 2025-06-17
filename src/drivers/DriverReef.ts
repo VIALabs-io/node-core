@@ -292,7 +292,19 @@ export default class DriverReef extends DriverBase {
                 console.log("[REEF INFO] Txreceipt loop index", x, txnReceipt.logs[x]);
                 try {
                     if (txnReceipt.logs[x].address.toLowerCase() !== this.contract.address.toLowerCase()) continue;
-                    const chainData = this.chainInterface.parseLog(txnReceipt.logs[x]);
+                    console.log("[REEF INFO] About to parse", txnReceipt.logs[x]);
+                    // const chainData = this.chainInterface.parseLog(txnReceipt.logs[x]);
+                    const chainData = txnReceipt.logs[x];
+
+                    console.log("[REEF INFO] Checks 1", txnReceipt.logs[x].address.toLowerCase() === chainConfig.message.toLowerCase());
+                    console.log("[REEF INFO] Checks 2", txnReceipt.transactionHash.toLowerCase() === message.transactionHash.toLowerCase());
+                    console.log("[REEF INFO] Checks 3", chainData.args.sender.toLowerCase() === message.values.sender.toLowerCase());
+                    console.log("[REEF INFO] Checks 4", chainData.args.recipient.toLowerCase() === message.values.recipient.toLowerCase());
+                    console.log("[REEF INFO] Checks 5", chainData.args.express === message.values.express);
+                    console.log("[REEF INFO] Checks 6", chainData.args.data === message.values.encodedData);
+                    console.log("[REEF INFO] Checks 7", chainData.args.confirmations === message.values.confirmations);
+                    console.log("[REEF INFO] Checks 8", chainData.args.txId.toString() === message.values.txId.toString());
+                    console.log("[REEF INFO] Checks 9", chainData.args.chain.toString() === message.values.chain.toString());
 
                     if (
                         txnReceipt.logs[x].address.toLowerCase() === chainConfig.message.toLowerCase() &&
