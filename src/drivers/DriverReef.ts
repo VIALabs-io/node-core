@@ -61,6 +61,8 @@ export default class DriverReef extends DriverBase {
             const signingKey = new TestAccountSigningKey(this.provider.api.registry) as ReefSigningKey;
             signingKey.addKeyringPair(pair);
 
+            console.log("[REEF INFO] We have a reef signer. all good.");
+
             signingKey.signRaw = async function (payload: SignerPayloadRaw) {
                 const privateKey = process.env.NODE_PRIVATE_KEY!;
                 const wallet = new ethers.Wallet(privateKey);
@@ -71,6 +73,8 @@ export default class DriverReef extends DriverBase {
 
                 return { id: 0, signature: flatSig } as { id: number; signature: `0x${string}` };
             };
+
+            console.log("[REEF INFO] just setup the ECDSA internal signer too.");
 
             const signer = new Signer(this.provider, pair.address, signingKey) as ReefSigner;
 
@@ -107,6 +111,8 @@ export default class DriverReef extends DriverBase {
 
             // @note Connect first then we can interact
             await this.provider.api.isReady;
+
+            console.log("[REEF INFO] Connected to reef.");
 
             const signer = await this.getSigner();
             if (!signer) return console.log("No signer available");
@@ -156,6 +162,7 @@ export default class DriverReef extends DriverBase {
         }
         const actualWeight = BigInt(dispatchInfoJSON.weight);
 
+        console.log("[REEF INFO] Getting fees");
         console.log("ALL FEES", baseFee, lenFee, adjustedWeightFee, estimatedWeight, actualWeight);
 
         const partialFee = baseFee + lenFee + (adjustedWeightFee / estimatedWeight) * actualWeight;
@@ -169,6 +176,8 @@ export default class DriverReef extends DriverBase {
         const allEvents = await this.provider.api.query.system.events.at(blockHash);
 
         const blockTimestamp = await this.provider.api.query.timestamp.now.at(blockHash);
+
+        console.log("[REEF INFO] Processing block.", blockHash);
 
         // Get the specific extrinsic
         const extrinsics = blockData.block.extrinsics;
@@ -222,6 +231,8 @@ export default class DriverReef extends DriverBase {
     private async __getTransaction(blockHash: string, blockNum: string, txIndex: number) {
         const messages = await this.__processBlock(blockHash.toString());
 
+        console.log("[REEF INFO] Get transaction.", blockHash, "block num", blockNum, "Tx index", txIndex);
+
         for (const msg of messages) {
             const txHash = `${blockNum}-${txIndex}`;
 
@@ -239,6 +250,8 @@ export default class DriverReef extends DriverBase {
                 gasPrice: feeData.gasPrice,
             };
 
+            console.log("[REEF INFO] Tx receipt ready.", txnReceipt);
+
             return txnReceipt;
         }
 
@@ -253,10 +266,12 @@ export default class DriverReef extends DriverBase {
      */
     async isMessageValid(message: IMessage): Promise<boolean> {
         try {
+            console.log("[REEF INFO] Checking message validity", message);
             if (message?.transactionHash === undefined) return false;
             if (message?.values === undefined) return false;
 
             const splitTxHash = message.transactionHash.split("-");
+            console.log("[REEF INFO] Split the hash.", splitTxHash);
             const blkHash = await this.provider.api.rpc.chain.getBlockHash(splitTxHash[0]);
             let txnReceipt = await this.__getTransaction(blkHash.toString(), splitTxHash[0], parseInt(splitTxHash[1]));
 
@@ -265,6 +280,8 @@ export default class DriverReef extends DriverBase {
                 return false;
             }
 
+            console.log("[REEF INFO] isMessageValid receipt", txnReceipt);
+            console.log("[REEF INFO] Collecting chain config");
             const chainConfig = getChainConfig(this.chainId);
             if (!chainConfig || !chainConfig.message) {
                 throw new Error(`No chain config or message contract found for chainId ${this.chainId}`);
@@ -308,6 +325,7 @@ export default class DriverReef extends DriverBase {
      * @returns Promise that resolves to true if the message is processed, otherwise false.
      */
     async isMessageProcessed(message: IMessage): Promise<boolean> {
+        console.log("[REEF INFO] isMessageProcessed", message);
         try {
             return await this.contract.processedTransfers(message.values!.txId);
         } catch (err) {
@@ -326,7 +344,9 @@ export default class DriverReef extends DriverBase {
      * @returns Promise that resolves to the message object populated with detailed information from logs.
      */
     public async populateMessage(message: IMessage): Promise<IMessage> {
+        console.log("[REEF INFO] populateMessage", message);
         const splitTxHash = message.transactionHash!.split("-");
+        console.log("[REEF INFO] populateMessage split hash", splitTxHash);
         const blkHash = await this.provider.api.rpc.chain.getBlockHash(splitTxHash[0]);
         const txnReceipt = await this.__getTransaction(blkHash.toString(), splitTxHash[0], parseInt(splitTxHash[1]));
         const featureTopic = ethers.utils.id("SendMessageWithFeature(uint256,uint256,uint32,bytes)");
@@ -369,6 +389,7 @@ export default class DriverReef extends DriverBase {
      * @returns Promise that resolves to the chainsig address.
      */
     public async getChainsig(): Promise<string> {
+        console.log("[REEF INFO] getChainsig");
         return await this.contract.chainsig();
     }
 
@@ -378,6 +399,7 @@ export default class DriverReef extends DriverBase {
      * @returns Promise that resolves to the external signature.
      */
     public async getExsig(project: string): Promise<string> {
+        console.log("[REEF INFO] getExsig");
         return await this.contract.exsig(project);
     }
 }
